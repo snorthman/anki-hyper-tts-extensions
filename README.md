@@ -19,4 +19,11 @@ If you'd like to create new HyperTTS services which interface with a TTS engine,
 The easiest approach would be to use a coding agent, and point it to the [AGENTS.md](AGENTS.md) file which contains instructions on how to create a new HyperTTS service.
 If you use Claude Code, you'll need to do `ln -s AGENTS.md CLAUDE.md`.
 
+You could also copy the contents of [AGENTS.md](AGENTS.md) into Claude on the web or OpenAI.
+
+## Example
+You can use the following prompt:
+Create a HyperTTS service for Kokoro82m hosted on Replicate. Instructions here: https://replicate.com/jaaari/kokoro-82m/api
+
+If you are using a web-based AI LLM such as ChatGPT or Claude.Ai, you'll need to paste the contents of [AGENTS.md](AGENTS.md) along with the prompt. If you're using a coding agent such as Open Code, Github Copilot, it will automatically use the instructions (for Claude Code, remember to do the symlink `ln -s AGENTS.md CLAUDE.md`).
 
