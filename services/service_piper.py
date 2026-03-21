@@ -1,3 +1,9 @@
+
+# documentation:
+# https://github.com/Vocab-Apps/anki-hyper-tts-extensions/blob/main/docs/services/PIPER.md
+# contributed by @FlyingCowMooMoo
+
+
 import os
 import tempfile
 import requests
