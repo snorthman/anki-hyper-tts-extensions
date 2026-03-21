@@ -22,12 +22,12 @@ If you use Claude Code, you'll need to do `ln -s AGENTS.md CLAUDE.md`.
 You could also copy the contents of [AGENTS.md](AGENTS.md) into Claude on the web or OpenAI.
 
 ## Example
-to create the service [services/service_replicate_kokoro.py](service_replicate_kokoro.py), I used the following prompt:
+to create the service [service_replicate_kokoro.py](services/service_replicate_kokoro.py), I used the following prompt:
 ```
 Create a HyperTTS service for Kokoro82m hosted on Replicate. Instructions here: https://replicate.com/jaaari/kokoro-82m/api
 ```
 
-[https://replicate.com/](Replicate) is a cloud service which lets you run AI models on the cloud with API access. It's very to deploy models such as Kokoro but you'll have to pay for access.
+[Replicate](https://replicate.com/) is a cloud service which lets you run AI models on the cloud with API access. It's very to deploy models such as Kokoro but you'll have to pay for access.
 
 If you are using a web-based AI LLM such as ChatGPT or Claude.Ai, you'll need to paste the contents of [AGENTS.md](AGENTS.md) along with the prompt. If you're using a coding agent such as Open Code, Github Copilot, it will automatically use the instructions (for Claude Code, remember to do the symlink `ln -s AGENTS.md CLAUDE.md`).
 
