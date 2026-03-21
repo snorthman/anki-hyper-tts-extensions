@@ -1,6 +1,6 @@
 # Anki HyperTTS Community Contributions
 
-This repository contains community-contributed services for the HyperTTS Anki addon (https://github.com/Vocab-Apps/anki-hyper-tts)
+This repository contains community-contributed services for the HyperTTS Anki addon (https://github.com/Vocab-Apps/anki-hyper-tts). The author of HyperTTS doesn't offer any support for those but you can open issues and we'll try to help.
 
 # How to use the services
 ## Download the service file
@@ -23,7 +23,9 @@ You could also copy the contents of [AGENTS.md](AGENTS.md) into Claude on the we
 
 ## Example
 to create the service [services/service_replicate_kokoro.py](service_replicate_kokoro.py), I used the following prompt:
+```
 Create a HyperTTS service for Kokoro82m hosted on Replicate. Instructions here: https://replicate.com/jaaari/kokoro-82m/api
+```
 
 [https://replicate.com/](Replicate) is a cloud service which lets you run AI models on the cloud with API access. It's very to deploy models such as Kokoro but you'll have to pay for access.
 
