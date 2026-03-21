@@ -35,7 +35,7 @@ REPLICATE_PREDICTIONS_URL = 'https://api.replicate.com/v1/predictions'
 REPLICATE_MODEL_VERSION = 'f559560eb822dc509045f3921a1921234918b91739db4bf3daab2169b71c7a13'
 
 
-class Kokoro(service.ServiceBase):
+class ReplicateKokoro(service.ServiceBase):
     CONFIG_API_KEY = 'api_key'
 
     def __init__(self):
