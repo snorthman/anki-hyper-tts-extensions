@@ -1,6 +1,6 @@
 # Anki HyperTTS Community Contributions
 
-This repository contains community-contributed services for the HyperTTS Anki addon (https://github.com/Vocab-Apps/anki-hyper-tts). The author of HyperTTS doesn't offer any support for those but you can open issues and we'll try to help.
+This repository contains community-contributed services for the HyperTTS Anki addon (https://github.com/Vocab-Apps/anki-hyper-tts) as well as documentation. The instructions here tend to require a bit of technical know how. The author of HyperTTS doesn't offer any support for those but you can open issues and we'll try to help.
 
 # How to use the services
 ## Download the service file
