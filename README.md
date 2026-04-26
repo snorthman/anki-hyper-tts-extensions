@@ -17,9 +17,6 @@ go to Anki `Tools` menu, then `HyperTTS: Services Configuration`, locate the ser
 # Creating new services
 If you'd like to create new HyperTTS services which interface with a TTS engine, whether local, open source or online, it's very easy, it only requires creating a single python script.
 The easiest approach would be to use a coding agent, and point it to the [AGENTS.md](AGENTS.md) file which contains instructions on how to create a new HyperTTS service.
-If you use Claude Code, you'll need to do `ln -s AGENTS.md CLAUDE.md`.
-
-You could also copy the contents of [AGENTS.md](AGENTS.md) into Claude on the web or OpenAI.
 
 ## Example
 to create the service [service_replicate_kokoro.py](services/service_replicate_kokoro.py), I used the following prompt:
