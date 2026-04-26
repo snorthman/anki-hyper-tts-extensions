@@ -26,5 +26,5 @@ Create a HyperTTS service for Kokoro82m hosted on Replicate. Instructions here: 
 
 [Replicate](https://replicate.com/) is a cloud service which lets you run AI models on the cloud with API access. It's very to deploy models such as Kokoro but you'll have to pay for access.
 
-If you are using a web-based AI LLM such as ChatGPT or Claude.Ai, you'll need to paste the contents of [AGENTS.md](AGENTS.md) along with the prompt. If you're using a coding agent such as Open Code, Github Copilot, it will automatically use the instructions (for Claude Code, remember to do the symlink `ln -s AGENTS.md CLAUDE.md`).
+If you are using a web-based AI LLM such as ChatGPT or Claude.Ai, you'll need to paste the contents of [AGENTS.md](AGENTS.md) along with the prompt. If you're using a coding agent such as Open Code, Github Copilot, it will automatically use the instructions.
 
