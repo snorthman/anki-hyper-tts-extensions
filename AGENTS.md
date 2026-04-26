@@ -10,7 +10,7 @@ This guide explains how to create a new TTS (Text-to-Speech) or dictionary servi
 | [hypertts_addon/voice.py](https://github.com/Vocab-Apps/anki-hyper-tts/blob/main/hypertts_addon/voice.py) | `TtsVoice_v3` dataclass representing a voice |
 | [hypertts_addon/languages.py](https://github.com/Vocab-Apps/anki-hyper-tts/blob/main/hypertts_addon/languages.py) | `Language` and `AudioLanguage` enums |
 | [hypertts_addon/constants.py](https://github.com/Vocab-Apps/anki-hyper-tts/blob/main/hypertts_addon/constants.py) | `Gender`, `ServiceType`, `ServiceFee` enums |
-| [hypertts_addon/errors.py](https://github.com/Vocab-Apps/anki-hyper-tts/blob/main/hypertts_addon/errors.py) | `RequestError`, `AudioNotFoundError` exceptions |
+| [hypertts_addon/errors.py](https://github.com/Vocab-Apps/anki-hyper-tts/blob/main/hypertts_addon/errors.py) | `ServiceRequestError` hierarchy (`PermanentError`, `TransientError`, etc.) |
 | [hypertts_addon/options.py](https://github.com/Vocab-Apps/anki-hyper-tts/blob/main/hypertts_addon/options.py) | `AudioFormat` enum, `AUDIO_FORMAT_PARAMETER` constant |
 
 Example services:
@@ -244,17 +244,85 @@ speed = voice_options.get('speed', voice.options['speed']['default'])
 
 ### Error Handling
 
-Raise these exceptions from `get_tts_audio`:
+`get_tts_audio` failures must be raised as one of the exceptions in the `ServiceRequestError`
+hierarchy. The retry/error-reporting layer keys off the exception class, so picking the right
+one matters — it determines whether the request is retried, surfaced to the user, or counted
+silently as "audio not found".
+
+```
+ServiceRequestError(source_text, voice, error_message)
+├── PermanentError                  retryable = False
+│   ├── ServicePermissionError      auth/authorization failure (401, 403)
+│   ├── ServiceInputError           input the service can't handle (unsupported format,
+│   │                                empty-after-tokenization, text too long, etc.)
+│   ├── AudioNotFoundError          dictionary lookup found no recording for this word/voice
+│   └── AudioNotFoundAnyVoiceError  internal — raised by the priority-mode runner, not by
+│                                    individual services
+└── TransientError                  retryable = True
+    ├── RateLimitError              generic 429 with no Retry-After
+    ├── RateLimitRetryAfterError    429 with a Retry-After value (pass it as 4th arg)
+    ├── ServiceTimeoutError         HTTP request timed out
+    ├── ServiceConnectionError      DNS failure, connection refused, network unreachable
+    └── UnknownServiceError         unclassified upstream failure
+```
+
+`RequestError` also exists as a legacy catch-all. Prefer one of the typed subclasses above
+for new code so retry logic works correctly; only fall back to `RequestError` when the failure
+genuinely doesn't fit any category.
+
+#### When to raise what
+
+| Situation | Exception |
+|-----------|-----------|
+| HTTP 401 / 403, invalid API key, expired token | `ServicePermissionError` |
+| HTTP 429 with `Retry-After` header | `RateLimitRetryAfterError(..., retry_after)` |
+| HTTP 429 without `Retry-After` | `RateLimitError` |
+| `requests.Timeout` / `socket.timeout` | `ServiceTimeoutError` |
+| `requests.ConnectionError`, DNS failure, refused | `ServiceConnectionError` |
+| Service rejects the input (format not supported, text too long, tokenizer produced empty input) | `ServiceInputError` |
+| Dictionary service: no recording for this word | `AudioNotFoundError` |
+| Other 4xx that won't succeed on retry | `PermanentError` (or a more specific subclass) |
+| Other 5xx / unexpected upstream failure that may succeed on retry | `UnknownServiceError` |
+| Truly ambiguous — can't classify | `RequestError` (legacy fallback) |
+
+#### Examples
 
 ```python
 from hypertts_addon import errors
 
-# API or network errors — the request failed
-raise errors.RequestError(source_text, voice, 'API returned 500')
+# Auth failure — won't succeed on retry, surfaces to the user
+if response.status_code == 401:
+    raise errors.ServicePermissionError(source_text, voice, f'auth failed: {response.text}')
 
-# Dictionary services only — word not found
+# Rate limited with a Retry-After header — retried after the given delay
+if response.status_code == 429:
+    retry_after = int(response.headers.get('Retry-After', 30))
+    raise errors.RateLimitRetryAfterError(source_text, voice, response.text, retry_after)
+
+# Service can't process this specific input — permanent for this text, not the service
+if audio_format != options.AudioFormat.mp3:
+    raise errors.ServiceInputError(source_text, voice,
+        f'{self.name} only supports mp3; {audio_format.name} not supported')
+
+# Dictionary service — word not in the dictionary
 raise errors.AudioNotFoundError(source_text, voice)
+
+# Wrap network-layer exceptions
+try:
+    response = requests.post(url, json=data, timeout=constants.RequestTimeout)
+except requests.exceptions.Timeout as e:
+    raise errors.ServiceTimeoutError(source_text, voice, str(e)) from e
+except requests.exceptions.ConnectionError as e:
+    raise errors.ServiceConnectionError(source_text, voice, str(e)) from e
 ```
+
+#### Configuration errors
+
+Don't raise these yourself — they come from the `ServiceBase` helpers:
+
+- `MissingServiceConfiguration` is raised automatically by `get_configuration_value_mandatory`
+  when the user hasn't set a required key (e.g. an API key). Just call the helper; don't
+  pre-check.
 
 ## Complete Example: TTS Service with API Key
 
@@ -326,19 +394,29 @@ class ExampleTTS(service.ServiceBase):
 
         speed = voice_options.get('speed', voice.options['speed']['default'])
 
-        response = requests.post(
-            'https://api.example.com/v1/tts',
-            json={
-                'text': source_text,
-                'voice': voice.voice_key['name'],
-                'speed': speed,
-            },
-            headers={'Authorization': f'Bearer {api_key}'},
-            timeout=30,
-        )
+        try:
+            response = requests.post(
+                'https://api.example.com/v1/tts',
+                json={
+                    'text': source_text,
+                    'voice': voice.voice_key['name'],
+                    'speed': speed,
+                },
+                headers={'Authorization': f'Bearer {api_key}'},
+                timeout=30,
+            )
+        except requests.exceptions.Timeout as e:
+            raise errors.ServiceTimeoutError(source_text, voice, str(e)) from e
+        except requests.exceptions.ConnectionError as e:
+            raise errors.ServiceConnectionError(source_text, voice, str(e)) from e
 
+        if response.status_code in (401, 403):
+            raise errors.ServicePermissionError(source_text, voice, f'auth failed: {response.text}')
+        if response.status_code == 429:
+            retry_after = int(response.headers.get('Retry-After', 30))
+            raise errors.RateLimitRetryAfterError(source_text, voice, response.text, retry_after)
         if response.status_code != 200:
-            raise errors.RequestError(source_text, voice, f'HTTP {response.status_code}: {response.text}')
+            raise errors.UnknownServiceError(source_text, voice, f'HTTP {response.status_code}: {response.text}')
 
         return response.content
 ```
