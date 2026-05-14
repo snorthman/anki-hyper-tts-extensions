@@ -3,10 +3,9 @@
 # contributed by @snorthman
 
 
-import os
+import pathlib
 import tempfile
 import requests
-import cachetools
 import aqt.sound
 
 from hypertts_addon import voice
@@ -82,7 +81,7 @@ class VOICEVOX(service.ServiceBase):
         else:
             return self._voices
 
-    def _request(self, source_text, voice, func: callable, endpoint: str, **kwargs) -> requests.Response:
+    def _request(self, source_text, voice, func, endpoint: str, **kwargs) -> requests.Response:
         try:
             response = func(f'http://127.0.0.1:50021/{endpoint}', **kwargs)
         except requests.exceptions.Timeout as e:
@@ -128,11 +127,6 @@ class VOICEVOX(service.ServiceBase):
 
                 return mp3_path.read_bytes()
         except Exception as e:
-            ts = datetime.datetime.now().isoformat(timespec='seconds')
-            with _DEBUG_LOG.open('a', encoding='utf-8') as f:
-                f.write(f'[{ts}] {type(e).__name__}: {e}\n')
-                f.write(traceback.format_exc())
-                f.write('\n')
             logger.error(e)
             raise
 
