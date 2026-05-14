@@ -219,7 +219,7 @@ speaker_dict = {
     '雨晴はう': ('Amehare Hau', constants.Gender.Female),
     '猫使アル': ('Nekotsukai Aru', constants.Gender.Female),
     'ちび式じい': ('Chibi-shiki Jii', constants.Gender.Male),
-    '雀松朱司': ('Suzumatsu Akashi', constants.Gender.Female),
+    '雀松朱司': ('Wakamatsu Akashi', constants.Gender.Male),
     '青山龍星': ('Aoyama Ryusei', constants.Gender.Male),
     'Voidoll': ('Voidoll', constants.Gender.Any),
     'あんこもん': ('Ankomon', constants.Gender.Female),
