@@ -208,7 +208,7 @@ speaker_dict = {
     '四国めたん': ('Shikoku Metan', constants.Gender.Female),
     'WhiteCUL': ('WhiteCUL', constants.Gender.Female),
     '猫使ビィ': ('Nekotsukai Bii', constants.Gender.Female),
-    '栗田まろん': ('Kurita Maron', constants.Gender.Female),
+    '栗田まろん': ('Kurita Maron', constants.Gender.Male),
     '櫻歌ミコ': ('Ouka Miko', constants.Gender.Female),
     '剣崎雌雄': ('Kenzaki Shiyuu', constants.Gender.Male),
     '離途': ('Rito', constants.Gender.Male),
